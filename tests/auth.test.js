@@ -1,20 +1,22 @@
 import { authMiddleware } from '../src/middleware/auth.js';
 
 describe('Middleware de Autenticación', () => {
-  test('Debería rechazar correos que no terminen en @upc.edu.pe', async () => {
-    const req = {
-      headers: { authorization: 'Bearer token_falso' }
-    };
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn()
-    };
+  test('Debería rechazar correos externos', async () => {
+    const { supabase } = await import('../src/config/supabaseClient.js');
+
+    // Simulamos usuario infiltrado de Gmail
+    supabase.auth.getUser.mockResolvedValue({
+      data: { user: { email: 'infiltrado@gmail.com' } },
+      error: null
+    });
+
+    const req = { headers: { authorization: 'Bearer token' } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     const next = jest.fn();
 
-    // Simulamos que supabase.auth.getUser devuelve un correo externo
-    // (Tendrías que mockear supabase.auth.getUser similar al ejemplo anterior)
-    
-    // Este test asegura que tu regla de negocio "Solo UPC" se mantenga firme 
-    // ante futuros cambios de código.
+    await authMiddleware(req, res, next);
+
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(next).not.toHaveBeenCalled();
   });
 });
