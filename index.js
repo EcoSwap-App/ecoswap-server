@@ -1,4 +1,4 @@
-import app from './src/server.js';
+import { app, server } from './src/server.js';
 import { supabase } from './src/config/supabaseClient.js';
 import cloudinary from './src/config/cloudinary.js';
 
@@ -14,7 +14,7 @@ async function start() {
     if (error) throw error;
     console.log('✅ Supabase listo');
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`🚀 Servidor en http://localhost:${PORT}`);
     });
   } catch (error) {

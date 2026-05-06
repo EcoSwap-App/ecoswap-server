@@ -10,17 +10,34 @@ export const syncProfile = async (req, res) => {
 
   const { data, error } = await supabase
     .from('users')
-    .upsert({ 
-      id, 
-      name, 
-      email, 
-      career, 
+    .upsert({
+      id,
+      name,
+      email,
+      career,
       cycle,
       reputation: 5.0, // Reputación inicial base
-      verified: true 
+      verified: true
     })
     .select();
 
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json(data[0]);
+};
+
+export const getUserStats = async (req, res) => {
+  const userId = req.user.id;
+
+  // Obtenemos datos del usuario y sumamos puntos de impacto de sus productos vendidos
+  const { data, error } = await supabase
+    .from('users')
+    .select(`
+      name, reputation, career,
+      products!inner(count)
+    `)
+    .eq('id', userId)
+    .eq('products.available', false); // Contamos solo lo ya vendido/donado
+
+  if (error) return res.status(400).json(error);
+  res.json(data[0]);
 };

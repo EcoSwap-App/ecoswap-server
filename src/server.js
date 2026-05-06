@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import http from 'http';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import productRoutes from './routes/product.routes.js';
@@ -12,6 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
+const server = http.createServer(app);
 
 // Middlewares
 app.use(cors({ origin: '*', credentials: true }));
@@ -26,5 +28,5 @@ app.use('/reputation', reputationRoutes);
 app.use('/reports', reportRoutes);
 app.use('/users', userRoutes);
 
-export default app;
+export default { app, server };
 
