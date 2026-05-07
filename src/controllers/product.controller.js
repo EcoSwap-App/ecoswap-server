@@ -35,6 +35,39 @@ export const createProduct = async (req, res) => {
   res.status(201).json(data);
 };
 
+export const getProductById = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', id);
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.json(data[0]);
+};
+
+export const updateProduct = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('products')
+    .update(req.body)
+    .eq('id', id);
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.status(200).json(data);
+};
+
+export const deleteProduct = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id);
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.status(200).json({ message: 'Producto eliminado correctamente' });
+};
+
 export const getAllProducts = async (req, res) => {
   const { data, error } = await supabase
     .from('products')
