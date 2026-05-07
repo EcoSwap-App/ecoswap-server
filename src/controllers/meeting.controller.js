@@ -21,3 +21,25 @@ export const createMeeting = async (req, res) => {
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json(data[0]);
 };
+
+export const confirmMeeting = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('meetings')
+    .update({ status: 'confirmed' })
+    .eq('id', id);
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.status(200).json(data[0]);
+};
+
+export const cancelMeeting = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from('meetings')
+    .update({ status: 'cancelled' })
+    .eq('id', id);
+
+  if (error) return res.status(400).json({ error: error.message });
+  res.status(200).json(data[0]);
+};
