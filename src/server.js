@@ -28,5 +28,5 @@ app.use('/reputation', reputationRoutes);
 app.use('/reports', reportRoutes);
 app.use('/users', userRoutes);
 
-export default { app, server };
+export { app, server };
 
