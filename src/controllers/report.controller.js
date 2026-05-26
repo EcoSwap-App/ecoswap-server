@@ -42,5 +42,8 @@ export const getReportById = async (req, res) => {
     .eq('id', id);
 
   if (error) return res.status(400).json({ error: error.message });
+  if (!data || data.length === 0) {
+    return res.status(404).json({ error: 'Reporte no encontrado' });
+  }
   res.json(data[0]);
 };

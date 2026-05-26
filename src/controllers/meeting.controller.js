@@ -27,9 +27,13 @@ export const confirmMeeting = async (req, res) => {
   const { data, error } = await supabase
     .from('meetings')
     .update({ status: 'confirmed' })
-    .eq('id', id);
+    .eq('id', id)
+    .select();
 
   if (error) return res.status(400).json({ error: error.message });
+  if (!data || data.length === 0) {
+    return res.status(404).json({ error: 'Reunión no encontrada' });
+  }
   res.status(200).json(data[0]);
 };
 
@@ -38,8 +42,12 @@ export const cancelMeeting = async (req, res) => {
   const { data, error } = await supabase
     .from('meetings')
     .update({ status: 'cancelled' })
-    .eq('id', id);
+    .eq('id', id)
+    .select();
 
   if (error) return res.status(400).json({ error: error.message });
+  if (!data || data.length === 0) {
+    return res.status(404).json({ error: 'Reunión no encontrada' });
+  }
   res.status(200).json(data[0]);
 };

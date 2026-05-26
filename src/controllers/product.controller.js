@@ -29,7 +29,7 @@ export const createProduct = async (req, res) => {
       status: req.body.status || 'used',
       available: true,
       model_3d: req.body.model3d
-    }]);
+    }]).select();
 
   if (error) return res.status(400).json({ error: error.message });
   res.status(201).json(data);
@@ -43,6 +43,9 @@ export const getProductById = async (req, res) => {
     .eq('id', id);
 
   if (error) return res.status(400).json({ error: error.message });
+  if (!data || data.length === 0) {
+    return res.status(404).json({ error: 'Producto no encontrado' });
+  }
   res.json(data[0]);
 };
 
@@ -51,9 +54,13 @@ export const updateProduct = async (req, res) => {
   const { data, error } = await supabase
     .from('products')
     .update(req.body)
-    .eq('id', id);
+    .eq('id', id)
+    .select();
 
   if (error) return res.status(400).json({ error: error.message });
+  if (!data || data.length === 0) {
+    return res.status(404).json({ error: 'Producto no encontrado' });
+  }
   res.status(200).json(data);
 };
 
