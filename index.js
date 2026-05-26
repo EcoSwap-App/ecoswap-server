@@ -10,9 +10,13 @@ async function start() {
     const cloudRes = await cloudinary.api.ping();
     console.log('✅ Cloudinary listo');
 
-    const { error } = await supabase.from('products').select('*').limit(1);
-    if (error) throw error;
-    console.log('✅ Supabase listo');
+    try {
+      const { error } = await supabase.from('products').select('*').limit(1);
+      if (error) throw error;
+      console.log('✅ Supabase listo');
+    } catch (sbError) {
+      console.warn('⚠️ Advertencia: No se pudo verificar la conexión con Supabase:', sbError.message);
+    }
 
     server.listen(PORT, () => {
       console.log(`🚀 Servidor en http://localhost:${PORT}`);
