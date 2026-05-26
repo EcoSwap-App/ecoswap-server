@@ -1,32 +1,24 @@
+import { jest } from '@jest/globals';
 import request from 'supertest';
-import app from '../src/server.js';
+import { app } from '../src/server.js';
 import { supabase } from '../src/config/supabaseClient.js';
-
-// Mock de Supabase para evitar llamadas reales a la API en los tests
-jest.mock('../src/config/supabaseClient.js', () => ({
-  supabase: {
-    from: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      insert: jest.fn().mockReturnThis(),
-      upsert: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      or: jest.fn().mockReturnThis(),
-      select: jest.fn().mockResolvedValue({ data: [], error: null }) // Respuesta final
-    })),
-    auth: {
-      getUser: jest.fn()
-    }
-  }
-}));
 
 describe('Endpoints de Productos', () => {
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   test('Debería obtener la lista de productos correctamente (GET /products)', async () => {
-    // Mock específico para el select
-    supabase.from().select.mockResolvedValue({
+    const mockEq = jest.fn().mockResolvedValue({
       data: [{ id: 1, title: 'Calculo I', price: 50 }],
       error: null
+    });
+    const mockSelect = jest.fn().mockReturnValue({
+      eq: mockEq
+    });
+    const fromSpy = jest.spyOn(supabase, 'from').mockReturnValue({
+      select: mockSelect
     });
 
     const res = await request(app).get('/products');

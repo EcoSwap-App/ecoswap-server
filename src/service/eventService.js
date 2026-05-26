@@ -1,3 +1,5 @@
+import { supabase } from "../config/supabaseClient.js";
+
 export const emitEvent = async (userId, type, payload) => {
     // 1. Lógica actual: Guardar en la tabla 'notifications'
     const { error } = await supabase
