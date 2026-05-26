@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { createMeeting, confirmMeeting, cancelMeeting } from '../controllers/meeting.controller.js';
 import { authMiddleware } from '../middlewares/authMiddleware.js';
+import { validate } from '../middlewares/validateMiddleware.js';
+import { createMeetingSchema } from '../schemas/meeting.schema.js';
 import { supabase } from '../config/supabaseClient.js';
 
 const router = Router();
 
-router.post('/', authMiddleware, createMeeting);
+router.post('/', authMiddleware, validate(createMeetingSchema), createMeeting);
 router.post('/:id/confirm', authMiddleware, confirmMeeting);
 router.post('/:id/cancel', authMiddleware, cancelMeeting);
 
