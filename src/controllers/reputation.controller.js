@@ -17,17 +17,24 @@ export const rateUser = async (req, res) => {
 
     if (rateError) throw rateError;
 
-    const { data: allRates } = await supabase
+    const { data: allRates, error: selectError } = await supabase
       .from('reputations')
       .select('points')
       .eq('user_id', targetUserId);
 
-    const average = allRates.reduce((acc, curr) => acc + curr.points, 0) / allRates.length;
+    if (selectError) throw selectError;
 
-    await supabase
+    let average = points;
+    if (allRates && allRates.length > 0) {
+      average = allRates.reduce((acc, curr) => acc + curr.points, 0) / allRates.length;
+    }
+
+    const { error: updateError } = await supabase
       .from('users')
       .update({ reputation: average })
       .eq('id', targetUserId);
+
+    if (updateError) throw updateError;
 
     res.status(201).json({ message: 'Calificación registrada', newReputation: average });
   } catch (error) {
