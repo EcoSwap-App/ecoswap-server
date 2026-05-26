@@ -28,16 +28,29 @@ export const syncProfile = async (req, res) => {
 export const getUserStats = async (req, res) => {
   const userId = req.user.id;
 
-  // Obtenemos datos del usuario y sumamos puntos de impacto de sus productos vendidos
-  const { data, error } = await supabase
+  // 1. Obtener datos básicos del usuario
+  const { data: user, error: userError } = await supabase
     .from('users')
-    .select(`
-      name, reputation, career,
-      products!inner(count)
-    `)
+    .select('name, reputation, career')
     .eq('id', userId)
-    .eq('products.available', false); // Contamos solo lo ya vendido/donado
+    .single();
 
-  if (error) return res.status(400).json(error);
-  res.json(data[0]);
+  if (userError) return res.status(400).json({ error: userError.message });
+
+  // 2. Contar productos vendidos/donados
+  const { count, error: countError } = await supabase
+    .from('products')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('available', false);
+
+  if (countError) return res.status(400).json({ error: countError.message });
+
+  // 3. Responder manteniendo la estructura esperada por el cliente
+  res.json({
+    name: user.name,
+    reputation: user.reputation,
+    career: user.career,
+    products: [{ count: count || 0 }]
+  });
 };
