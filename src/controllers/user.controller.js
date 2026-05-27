@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabaseClient.js';
+import { TABLES } from '../constants/entities.js';
 
 export const syncProfile = async (req, res) => {
   const { name, career, cycle } = req.body;
@@ -9,7 +10,7 @@ export const syncProfile = async (req, res) => {
   }
 
   const { data, error } = await supabase
-    .from('users')
+    .from(TABLES.USERS)
     .upsert({
       id,
       name,
@@ -30,7 +31,7 @@ export const getUserStats = async (req, res) => {
 
   // 1. Obtener datos básicos del usuario
   const { data: user, error: userError } = await supabase
-    .from('users')
+    .from(TABLES.USERS)
     .select('name, reputation, career')
     .eq('id', userId)
     .single();
@@ -39,7 +40,7 @@ export const getUserStats = async (req, res) => {
 
   // 2. Contar productos vendidos/donados
   const { count, error: countError } = await supabase
-    .from('products')
+    .from(TABLES.PRODUCTS)
     .select('*', { count: 'exact', head: true })
     .eq('user_id', userId)
     .eq('available', false);

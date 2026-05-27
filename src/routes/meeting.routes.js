@@ -4,6 +4,7 @@ import { authMiddleware } from '../middlewares/authMiddleware.js';
 import { validate } from '../middlewares/validateMiddleware.js';
 import { createMeetingSchema } from '../schemas/meeting.schema.js';
 import { supabase } from '../config/supabaseClient.js';
+import { TABLES } from '../constants/entities.js';
 
 const router = Router();
 
@@ -13,7 +14,7 @@ router.post('/:id/cancel', authMiddleware, cancelMeeting);
 
 router.get('/my-meetings', authMiddleware, async (req, res) => {
     const { data, error } = await supabase
-        .from('meetings')
+        .from(TABLES.MEETINGS)
         .select('*, products(title), locations(name)')
         .or(`creator_id.eq.${req.user.id},interested_id.eq.${req.user.id}`);
 

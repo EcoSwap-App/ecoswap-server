@@ -1,3 +1,9 @@
 export const TABLES = {
   PRODUCTS: 'products',
+  USERS: 'users',
+  MEETINGS: 'meetings',
+  REPUTATIONS: 'reputations',
+  REPORTS: 'reports',
+  NOTIFICATIONS: 'notifications',
+  LOCATIONS: 'locations',
 };

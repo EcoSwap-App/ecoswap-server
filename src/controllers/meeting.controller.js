@@ -1,11 +1,12 @@
 import { supabase } from '../config/supabaseClient.js';
+import { TABLES } from '../constants/entities.js';
 
 export const createMeeting = async (req, res) => {
   const { productId, interestedId, locationId, date, time, notes } = req.body;
   const creatorId = req.user.id; // Obtenido del authMiddleware
 
   const { data, error } = await supabase
-    .from('meetings')
+    .from(TABLES.MEETINGS)
     .insert([{
       product_id: productId,
       creator_id: creatorId,
@@ -25,7 +26,7 @@ export const createMeeting = async (req, res) => {
 export const confirmMeeting = async (req, res) => {
   const { id } = req.params;
   const { data, error } = await supabase
-    .from('meetings')
+    .from(TABLES.MEETINGS)
     .update({ status: 'confirmed' })
     .eq('id', id)
     .select();
@@ -40,7 +41,7 @@ export const confirmMeeting = async (req, res) => {
 export const cancelMeeting = async (req, res) => {
   const { id } = req.params;
   const { data, error } = await supabase
-    .from('meetings')
+    .from(TABLES.MEETINGS)
     .update({ status: 'cancelled' })
     .eq('id', id)
     .select();

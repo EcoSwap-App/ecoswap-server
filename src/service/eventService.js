@@ -1,9 +1,10 @@
 import { supabase } from "../config/supabaseClient.js";
+import { TABLES } from "../constants/entities.js";
 
 export const emitEvent = async (userId, type, payload) => {
     // 1. Lógica actual: Guardar en la tabla 'notifications'
     const { error } = await supabase
-        .from('notifications')
+        .from(TABLES.NOTIFICATIONS)
         .insert([{ user_id: userId, type, message: payload.message }]);
 
     // 2. Lógica futura: Conectar con Socket.io

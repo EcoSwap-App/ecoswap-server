@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabaseClient.js';
 import cloudinary from '../config/cloudinary.js';
+import { TABLES } from '../constants/entities.js';
 
 export const createProduct = async (req, res) => {
   const { title, price, imageBase64, category } = req.body;
@@ -19,7 +20,7 @@ export const createProduct = async (req, res) => {
   }
 
   const { data, error } = await supabase
-    .from('products')
+    .from(TABLES.PRODUCTS)
     .insert([{
       title,
       price,
@@ -38,7 +39,7 @@ export const createProduct = async (req, res) => {
 export const getProductById = async (req, res) => {
   const { id } = req.params;
   const { data, error } = await supabase
-    .from('products')
+    .from(TABLES.PRODUCTS)
     .select('*')
     .eq('id', id);
 
@@ -54,7 +55,7 @@ export const updateProduct = async (req, res) => {
   const userId = req.user.id;
 
   const { data: existingProduct, error: checkError } = await supabase
-    .from('products')
+    .from(TABLES.PRODUCTS)
     .select('user_id')
     .eq('id', id);
 
@@ -68,7 +69,7 @@ export const updateProduct = async (req, res) => {
   }
 
   const { data, error } = await supabase
-    .from('products')
+    .from(TABLES.PRODUCTS)
     .update(req.body)
     .eq('id', id)
     .select();
@@ -82,7 +83,7 @@ export const deleteProduct = async (req, res) => {
   const userId = req.user.id;
 
   const { data: existingProduct, error: checkError } = await supabase
-    .from('products')
+    .from(TABLES.PRODUCTS)
     .select('user_id')
     .eq('id', id);
 
@@ -96,7 +97,7 @@ export const deleteProduct = async (req, res) => {
   }
 
   const { error } = await supabase
-    .from('products')
+    .from(TABLES.PRODUCTS)
     .delete()
     .eq('id', id);
 
@@ -106,7 +107,7 @@ export const deleteProduct = async (req, res) => {
 
 export const getAllProducts = async (req, res) => {
   const { data, error } = await supabase
-    .from('products')
+    .from(TABLES.PRODUCTS)
     .select('*')
     .eq('available', true);
 

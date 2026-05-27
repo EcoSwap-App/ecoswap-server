@@ -1,11 +1,12 @@
 import { supabase } from '../config/supabaseClient.js';
+import { TABLES } from '../constants/entities.js';
 
 export const createReport = async (req, res) => {
   const { reportedUserId, productId, reason } = req.body;
   const reporterId = req.user.id;
 
   const { data, error } = await supabase
-    .from('reports')
+    .from(TABLES.REPORTS)
     .insert([{
       reporter_id: reporterId,
       reported_user_id: reportedUserId,
@@ -25,7 +26,7 @@ export const createReport = async (req, res) => {
 
 export const getReports = async (req, res) => {
   const { data, error } = await supabase
-    .from('reports')
+    .from(TABLES.REPORTS)
     .select('*')
     .eq('status', 'pending');
 
@@ -37,7 +38,7 @@ export const getReports = async (req, res) => {
 export const getReportById = async (req, res) => {
   const { id } = req.params;
   const { data, error } = await supabase
-    .from('reports')
+    .from(TABLES.REPORTS)
     .select('*')
     .eq('id', id);
 

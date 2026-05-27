@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabaseClient.js';
+import { TABLES } from '../constants/entities.js';
 
 export const rateUser = async (req, res) => {
   const { targetUserId, points, meetingId, reason } = req.body;
@@ -6,7 +7,7 @@ export const rateUser = async (req, res) => {
 
   try {
     const { error: rateError } = await supabase
-      .from('reputations')
+      .from(TABLES.REPUTATIONS)
       .insert([{ 
         user_id: targetUserId, 
         points, 
@@ -18,7 +19,7 @@ export const rateUser = async (req, res) => {
     if (rateError) throw rateError;
 
     const { data: allRates, error: selectError } = await supabase
-      .from('reputations')
+      .from(TABLES.REPUTATIONS)
       .select('points')
       .eq('user_id', targetUserId);
 
@@ -30,7 +31,7 @@ export const rateUser = async (req, res) => {
     }
 
     const { error: updateError } = await supabase
-      .from('users')
+      .from(TABLES.USERS)
       .update({ reputation: average })
       .eq('id', targetUserId);
 
