@@ -6,6 +6,8 @@ import { rateUserSchema } from '../schemas/reputation.schema.js';
 
 const router = Router();
 
-router.post('/', authMiddleware, validate(rateUserSchema), rateUser);
+router.use(authMiddleware);
+
+router.post('/', validate(rateUserSchema), rateUser);
 
 export default router;

@@ -6,10 +6,12 @@ import { createProductSchema } from '../schemas/product.schema.js';
 
 const router = express.Router();
 
-router.post('/', authMiddleware, validate(createProductSchema), createProduct);
+router.use(authMiddleware);
+
+router.post('/', validate(createProductSchema), createProduct);
 router.get('/', getAllProducts);
-router.get('/:id', authMiddleware, getProductById);
-router.put('/:id', authMiddleware, updateProduct);
-router.delete('/:id', authMiddleware, deleteProduct);
+router.get('/:id', getProductById);
+router.put('/:id', updateProduct);
+router.delete('/:id', deleteProduct);
 
 export default router;

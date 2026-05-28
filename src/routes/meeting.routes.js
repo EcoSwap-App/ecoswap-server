@@ -8,11 +8,13 @@ import { TABLES } from '../constants/entities.js';
 
 const router = Router();
 
-router.post('/', authMiddleware, validate(createMeetingSchema), createMeeting);
-router.post('/:id/confirm', authMiddleware, confirmMeeting);
-router.post('/:id/cancel', authMiddleware, cancelMeeting);
+router.use(authMiddleware);
 
-router.get('/my-meetings', authMiddleware, async (req, res) => {
+router.post('/', validate(createMeetingSchema), createMeeting);
+router.post('/:id/confirm', confirmMeeting);
+router.post('/:id/cancel', cancelMeeting);
+
+router.get('/my-meetings', async (req, res) => {
     const { data, error } = await supabase
         .from(TABLES.MEETINGS)
         .select('*, products(title), locations(name)')

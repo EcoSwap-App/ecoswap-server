@@ -4,8 +4,10 @@ import { authMiddleware } from '../middlewares/authMiddleware.js';
 
 const router = Router();
 
-router.post('/', authMiddleware, createReport);
-router.get('/', authMiddleware, getReports);
-router.get('/:id', authMiddleware, getReportById);
+router.use(authMiddleware);
+
+router.post('/', createReport);
+router.get('/', getReports);
+router.get('/:id', getReportById);
 
 export default router;

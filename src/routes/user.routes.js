@@ -5,7 +5,9 @@ import { getUserStats } from '../controllers/user.controller.js';
 
 const router = Router();
 
-router.post('/sync', authMiddleware, syncProfile);
-router.get('/stats', authMiddleware, getUserStats);
+router.use(authMiddleware);
+
+router.post('/sync', syncProfile);
+router.get('/stats', getUserStats);
 
 export default router;
