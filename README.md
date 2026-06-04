@@ -54,33 +54,36 @@ CLOUDINARY_API_SECRET=tu_cloudinary_api_secret
 
 1. **Instalar dependencias:**
    ```bash
-   npm install
+   pnpm install
    ```
 
 2. **Ejecutar en desarrollo:**
    ```bash
-   npm run dev
+   pnpm run dev
    # o alternativamente:
    node index.js
    ```
 
 3. **Ejecutar pruebas unitarias:**
    ```bash
-   npm test
+   pnpm test
    ```
 
 ---
 
 ## 📡 Endpoints del API
 
+> [!IMPORTANT]
+> Todos los endpoints listados a continuación requieren autenticación mediante un token JWT en las cabeceras de la solicitud (`Authorization: Bearer <JWT_TOKEN>`).
+
 ### 👥 Usuarios (`/users`)
-- `POST /users/sync-profile` - Sincroniza el perfil del usuario autenticado (requiere JWT).
+- `POST /users/sync` - Sincroniza el perfil del usuario autenticado.
 - `GET /users/stats` - Obtiene las estadísticas del usuario (productos donados/intercambiados, reputación, etc.).
 
 ### 📦 Productos (`/products`)
 - `GET /products` - Lista todos los productos disponibles.
 - `GET /products/:id` - Obtiene la información detallada de un producto por ID.
-- `POST /products` - Registra un nuevo producto (requiere autenticación JWT y base64 de imagen).
+- `POST /products` - Registra un nuevo producto (requiere base64 de imagen).
 - `PUT /products/:id` - Actualiza un producto existente (requiere ser el propietario).
 - `DELETE /products/:id` - Elimina un producto (requiere ser el propietario).
 
