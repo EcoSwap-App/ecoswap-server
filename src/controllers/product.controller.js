@@ -2,23 +2,30 @@ import { supabase } from '../config/supabaseClient.js';
 import cloudinary from '../config/cloudinary.js';
 import { TABLES } from '../constants/entities.js';
 
+/**
+ * Registra un nuevo producto.
+ * Primero sube la imagen (Base64) a Cloudinary para optimización
+ * y luego guarda la URL resultante en la base de datos de Supabase.
+ */
 export const createProduct = async (req, res) => {
   const { title, price, imageBase64, category } = req.body;
   let uploadRes;
 
   try {
+    // Sube la imagen a Cloudinary en formato Base64 optimizándola
     uploadRes = await cloudinary.uploader.upload(imageBase64, {
       folder: 'ecoswap-app/products',
       transformation: [
-        { width: 800, height: 800, crop: "limit" },
-        { quality: 35 },
-        { fetch_format: "auto" }
+        { width: 800, height: 800, crop: "limit" }, // Limita tamaño máximo
+        { quality: 35 },                            // Comprime calidad para ahorrar ancho de banda
+        { fetch_format: "auto" }                    // Convierte a formatos modernos como WebP automáticamente
       ]
     });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
 
+  // Inserta el producto en Supabase vinculándolo al usuario autenticado (req.user.id)
   const { data, error } = await supabase
     .from(TABLES.PRODUCTS)
     .insert([{
@@ -50,10 +57,15 @@ export const getProductById = async (req, res) => {
   res.json(data[0]);
 };
 
+/**
+ * Actualiza un producto existente.
+ * Valida previamente que el producto exista y que el usuario solicitante sea el propietario.
+ */
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
 
+  // Paso 1: Verificar existencia y obtener propietario del producto
   const { data: existingProduct, error: checkError } = await supabase
     .from(TABLES.PRODUCTS)
     .select('user_id')
@@ -64,10 +76,12 @@ export const updateProduct = async (req, res) => {
     return res.status(404).json({ error: 'Producto no encontrado' });
   }
 
+  // Paso 2: Validar propiedad (solo el creador puede editar)
   if (existingProduct[0].user_id !== userId) {
     return res.status(403).json({ error: 'No tienes permisos para modificar este producto' });
   }
 
+  // Paso 3: Realizar la actualización
   const { data, error } = await supabase
     .from(TABLES.PRODUCTS)
     .update(req.body)
@@ -78,10 +92,15 @@ export const updateProduct = async (req, res) => {
   res.status(200).json(data);
 };
 
+/**
+ * Elimina un producto.
+ * Valida previamente propiedad del producto.
+ */
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
 
+  // Paso 1: Verificar existencia y propiedad
   const { data: existingProduct, error: checkError } = await supabase
     .from(TABLES.PRODUCTS)
     .select('user_id')
@@ -96,6 +115,7 @@ export const deleteProduct = async (req, res) => {
     return res.status(403).json({ error: 'No tienes permisos para eliminar este producto' });
   }
 
+  // Paso 2: Eliminar físicamente el producto de la base de datos
   const { error } = await supabase
     .from(TABLES.PRODUCTS)
     .delete()
@@ -105,6 +125,9 @@ export const deleteProduct = async (req, res) => {
   res.status(200).json({ message: 'Producto eliminado correctamente' });
 };
 
+/**
+ * Obtiene todos los productos que sigan marcados como disponibles.
+ */
 export const getAllProducts = async (req, res) => {
   const { data, error } = await supabase
     .from(TABLES.PRODUCTS)

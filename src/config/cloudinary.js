@@ -1,7 +1,6 @@
 import { v2 as cloudinary } from 'cloudinary';
 
-
-
+// Configura el cliente de Cloudinary utilizando las credenciales cargadas desde el archivo .env
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -16,9 +15,10 @@ cloudinary.config({
 
 try {
     const result = await cloudinary.api.ping();
-     console.log("✅ ¡Conexión exitosa!", result);
+    console.log("✅ ¡Conexión exitosa!", result);
 } catch (error) {
-     console.log("❌ Error de autenticación:", error.message);
+    console.log("❌ Error de autenticación:", error.message);
 }
 
 export default cloudinary;
+

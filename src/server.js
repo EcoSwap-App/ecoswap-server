@@ -15,13 +15,16 @@ const __dirname = dirname(__filename);
 const app = express();
 const server = http.createServer(app);
 
-// Middlewares
+// MIDDLEWARES GENERALES
+// Habilita el intercambio de recursos de origen cruzado (CORS) para cualquier dominio
 app.use(cors({ origin: '*', credentials: true }));
+// Middleware para parsear cuerpos JSON. Se establece el límite a 50MB para permitir la recepción de imágenes en Base64
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+// Servidor de archivos estáticos local para la carpeta 'uploads' (uso alternativo o de fallback para almacenamiento)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Rutas
+// REGISTRO DE RUTAS DEL API
 app.use('/products', productRoutes);
 app.use('/meetings', meetingRoutes);
 app.use('/reputation', reputationRoutes);
@@ -29,4 +32,5 @@ app.use('/reports', reportRoutes);
 app.use('/users', userRoutes);
 
 export { app, server };
+
 
