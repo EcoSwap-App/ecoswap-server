@@ -8,6 +8,7 @@ import userRoutes from './routes/user.routes.js';
 import meetingRoutes from './routes/meeting.routes.js';
 import reputationRoutes from './routes/reputation.routes.js';
 import reportRoutes from './routes/report.routes.js';
+import categoryRoutes from './routes/category.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,6 +31,7 @@ app.use('/meetings', meetingRoutes);
 app.use('/reputation', reputationRoutes);
 app.use('/reports', reportRoutes);
 app.use('/users', userRoutes);
+app.use('/categories', categoryRoutes);
 
 export { app, server };
 

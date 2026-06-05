@@ -10,6 +10,12 @@ describe('Endpoints de Productos', () => {
   });
 
   test('Debería obtener la lista de productos correctamente (GET /products)', async () => {
+    // Simular autenticación exitosa con correo UPC
+    const authSpy = jest.spyOn(supabase.auth, 'getUser').mockResolvedValue({
+      data: { user: { id: 'mock-user-id', email: 'alumno@upc.edu.pe' } },
+      error: null
+    });
+
     const mockEq = jest.fn().mockResolvedValue({
       data: [{ id: 1, title: 'Calculo I', price: 50 }],
       error: null
@@ -21,7 +27,9 @@ describe('Endpoints de Productos', () => {
       select: mockSelect
     });
 
-    const res = await request(app).get('/products');
+    const res = await request(app)
+      .get('/products')
+      .set('Authorization', 'Bearer valid-mock-token');
 
     expect(res.statusCode).toEqual(200);
     expect(Array.isArray(res.body)).toBe(true);
