@@ -16,6 +16,8 @@ export const syncProfile = async (req, res) => {
   }
 
   // Inserta el registro o actualiza los campos si el usuario ya existe (upsert basado en la clave primaria 'id')
+  // Se omite el campo 'reputation' para que la base de datos aplique su valor por defecto (5.0) en nuevos usuarios
+  // y preserve la reputación existente al actualizar perfiles.
   const { data, error } = await supabase
     .from(TABLES.USERS)
     .upsert({
@@ -24,7 +26,6 @@ export const syncProfile = async (req, res) => {
       email,
       career,
       cycle,
-      reputation: 5.0, // Reputación base por defecto para nuevos perfiles
       verified: true
     })
     .select();
@@ -66,4 +67,4 @@ export const getUserStats = async (req, res) => {
     career: user.career,
     products: [{ count: count || 0 }]
   });
-};
+};

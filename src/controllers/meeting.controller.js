@@ -25,6 +25,24 @@ export const createMeeting = async (req, res) => {
 
 export const confirmMeeting = async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
+
+  // Paso 1: Consultar la reunión para validar participantes
+  const { data: meeting, error: selectError } = await supabase
+    .from(TABLES.MEETINGS)
+    .select('creator_id, interested_id')
+    .eq('id', id)
+    .single();
+
+  if (selectError) return res.status(400).json({ error: selectError.message });
+  if (!meeting) return res.status(404).json({ error: 'Reunión no encontrada' });
+
+  // Paso 2: Validar que el usuario sea el creador o el interesado de la reunión
+  if (userId !== meeting.creator_id && userId !== meeting.interested_id) {
+    return res.status(403).json({ error: 'No tienes permisos para confirmar esta reunión' });
+  }
+
+  // Paso 3: Realizar la actualización
   const { data, error } = await supabase
     .from(TABLES.MEETINGS)
     .update({ status: 'confirmed' })
@@ -32,14 +50,29 @@ export const confirmMeeting = async (req, res) => {
     .select();
 
   if (error) return res.status(400).json({ error: error.message });
-  if (!data || data.length === 0) {
-    return res.status(404).json({ error: 'Reunión no encontrada' });
-  }
   res.status(200).json(data[0]);
 };
 
 export const cancelMeeting = async (req, res) => {
   const { id } = req.params;
+  const userId = req.user.id;
+
+  // Paso 1: Consultar la reunión para validar participantes
+  const { data: meeting, error: selectError } = await supabase
+    .from(TABLES.MEETINGS)
+    .select('creator_id, interested_id')
+    .eq('id', id)
+    .single();
+
+  if (selectError) return res.status(400).json({ error: selectError.message });
+  if (!meeting) return res.status(404).json({ error: 'Reunión no encontrada' });
+
+  // Paso 2: Validar que el usuario sea participante de la reunión
+  if (userId !== meeting.creator_id && userId !== meeting.interested_id) {
+    return res.status(403).json({ error: 'No tienes permisos para cancelar esta reunión' });
+  }
+
+  // Paso 3: Realizar la actualización del estado
   const { data, error } = await supabase
     .from(TABLES.MEETINGS)
     .update({ status: 'cancelled' })
@@ -47,8 +80,5 @@ export const cancelMeeting = async (req, res) => {
     .select();
 
   if (error) return res.status(400).json({ error: error.message });
-  if (!data || data.length === 0) {
-    return res.status(404).json({ error: 'Reunión no encontrada' });
-  }
   res.status(200).json(data[0]);
 };

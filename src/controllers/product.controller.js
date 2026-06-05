@@ -82,9 +82,10 @@ export const updateProduct = async (req, res) => {
   }
 
   // Paso 3: Realizar la actualización
+  const { title, price, model3d, status, available } = req.body;
   const { data, error } = await supabase
     .from(TABLES.PRODUCTS)
-    .update(req.body)
+    .update({ title, price, model_3d: model3d, status, available })
     .eq('id', id)
     .select();
 
