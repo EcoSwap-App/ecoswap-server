@@ -10,6 +10,11 @@ describe('Endpoints de Productos', () => {
   });
 
   test('Debería obtener la lista de productos correctamente (GET /products)', async () => {
+    jest.spyOn(supabase.auth, 'getUser').mockResolvedValue({
+      data: { user: { id: 'user-id-123', email: 'estudiante@upc.edu.pe' } },
+      error: null
+    });
+
     const mockEq = jest.fn().mockResolvedValue({
       data: [{ id: 1, title: 'Calculo I', price: 50 }],
       error: null
@@ -21,7 +26,9 @@ describe('Endpoints de Productos', () => {
       select: mockSelect
     });
 
-    const res = await request(app).get('/products');
+    const res = await request(app)
+      .get('/products')
+      .set('Authorization', 'Bearer valid-token');
 
     expect(res.statusCode).toEqual(200);
     expect(Array.isArray(res.body)).toBe(true);

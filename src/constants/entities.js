@@ -6,4 +6,6 @@ export const TABLES = {
   REPORTS: 'reports',
   NOTIFICATIONS: 'notifications',
   LOCATIONS: 'locations',
+  CATEGORIES: 'categories',
+  MESSAGES: 'messages',
 };

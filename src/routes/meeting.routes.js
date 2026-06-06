@@ -5,6 +5,7 @@ import { validate } from '../middlewares/validateMiddleware.js';
 import { createMeetingSchema } from '../schemas/meeting.schema.js';
 import { supabase } from '../config/supabaseClient.js';
 import { TABLES } from '../constants/entities.js';
+import messageRoutes from './message.routes.js';
 
 const router = Router();
 
@@ -23,5 +24,7 @@ router.get('/my-meetings', async (req, res) => {
     if (error) return res.status(400).json(error);
     res.json(data);
 });
+
+router.use('/:meetingId/messages', messageRoutes);
 
 export default router;
