@@ -8,19 +8,25 @@ import { TABLES } from '../constants/entities.js';
  * y luego guarda la URL resultante en la base de datos de Supabase.
  */
 export const createProduct = async (req, res) => {
-  const { title, price, imageBase64, category } = req.body;
-  let uploadRes;
+  const { title, price, imagesBase64, category, description, type } = req.body;
+  let uploadUrls = [];
 
   try {
-    // Sube la imagen a Cloudinary en formato Base64 optimizándola
-    uploadRes = await cloudinary.uploader.upload(imageBase64, {
-      folder: 'ecoswap-app/products',
-      transformation: [
-        { width: 800, height: 800, crop: "limit" }, // Limita tamaño máximo
-        { quality: 35 },                            // Comprime calidad para ahorrar ancho de banda
-        { fetch_format: "auto" }                    // Convierte a formatos modernos como WebP automáticamente
-      ]
-    });
+    if (imagesBase64 && imagesBase64.length > 0) {
+      // Sube las imágenes a Cloudinary en formato Base64 optimizándolas en paralelo
+      const uploadPromises = imagesBase64.map(base64 =>
+        cloudinary.uploader.upload(base64, {
+          folder: 'ecoswap-app/products',
+          transformation: [
+            { width: 800, height: 800, crop: "limit" }, // Limita tamaño máximo
+            { quality: 35 },                            // Comprime calidad para ahorrar ancho de banda
+            { fetch_format: "auto" }                    // Convierte a formatos modernos como WebP automáticamente
+          ]
+        })
+      );
+      const uploadResults = await Promise.all(uploadPromises);
+      uploadUrls = uploadResults.map(result => result.secure_url);
+    }
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
@@ -31,12 +37,14 @@ export const createProduct = async (req, res) => {
     .insert([{
       title,
       price,
+      description,
       category_id: category,
-      image_url: uploadRes.secure_url,
+      image_url: uploadUrls,
       user_id: req.user.id,
       status: req.body.status || 'used',
       available: true,
-      model_3d: req.body.model3d
+      model_3d: req.body.model3d,
+      type: type || 'sale'
     }]).select();
 
   if (error) return res.status(400).json({ error: error.message });
@@ -82,11 +90,11 @@ export const updateProduct = async (req, res) => {
   }
 
   // Paso 3: Realizar la actualización
-  const { title, price, model3d, status, available } = req.body;
+  const { title, price, model3d, status, available, description, type } = req.body;
   const { data, error } = await supabase
     .from(TABLES.PRODUCTS)
-    .update({ title, price, model_3d: model3d, status, available })
-    .eq('id', id)
+    .update({ title, price, model_3d: model3d, status, available, description, type })
+    .eq( 'id', id )
     .select();
 
   if (error) return res.status(400).json({ error: error.message });
@@ -130,10 +138,20 @@ export const deleteProduct = async (req, res) => {
  * Obtiene todos los productos que sigan marcados como disponibles.
  */
 export const getAllProducts = async (req, res) => {
-  const { data, error } = await supabase
+  const { userId, excludeUserId } = req.query;
+  let query = supabase
     .from(TABLES.PRODUCTS)
     .select('*')
     .eq('available', true);
+
+  if (userId) {
+    query = query.eq('user_id', userId);
+  }
+  if (excludeUserId) {
+    query = query.neq('user_id', excludeUserId);
+  }
+
+  const { data, error } = await query;
 
   if (error) return res.status(400).json({ error: error.message });
   res.json(data);

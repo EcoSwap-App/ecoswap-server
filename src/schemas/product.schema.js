@@ -7,12 +7,12 @@ export const createProductSchema = z.object({
   price: z.coerce.number({
     invalid_type_error: 'El precio debe ser un número.'
   }).min(0, 'El precio del producto es obligatorio y debe ser un número no negativo.'),
-  imageBase64: z.string({
-    required_error: 'La imagen del producto es obligatoria.'
-  }).min(1, 'La imagen del producto es obligatoria y debe ser un string Base64 válido.'),
+  imagesBase64: z.array(z.string()).optional(),
   category: z.any({
     required_error: 'La categoría del producto es obligatoria.'
   }),
+  description: z.string().optional(),
   status: z.string().optional(),
-  model3d: z.string().optional()
+  model3d: z.string().optional(),
+  type: z.enum(['sale', 'wanted']).optional()
 });

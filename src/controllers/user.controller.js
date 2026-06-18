@@ -68,3 +68,38 @@ export const getUserStats = async (req, res) => {
     products: [{ count: count || 0 }]
   });
 };
+
+export const getUserById = async (req, res) => {
+  const { id } = req.params;
+  const { data, error } = await supabase
+    .from(TABLES.USERS)
+    .select('*')
+    .eq('id', id)
+    .maybeSingle();
+
+  if (error) return res.status(400).json({ error: error.message });
+  if (!data) return res.status(404).json({ error: 'Usuario no encontrado' });
+  res.json(data);
+};
+
+export const updateProfile = async (req, res) => {
+  const { name, career, cycle, avatar, verified } = req.body;
+  const userId = req.user.id;
+
+  const updateData = {};
+  if (name !== undefined) updateData.name = name;
+  if (career !== undefined) updateData.career = career;
+  if (cycle !== undefined) updateData.cycle = cycle;
+  if (avatar !== undefined) updateData.avatar = avatar;
+  if (verified !== undefined) updateData.verified = verified;
+
+  const { data, error } = await supabase
+    .from(TABLES.USERS)
+    .update(updateData)
+    .eq('id', userId)
+    .select();
+
+  if (error) return res.status(400).json({ error: error.message });
+  if (!data || data.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+  res.json(data[0]);
+};
