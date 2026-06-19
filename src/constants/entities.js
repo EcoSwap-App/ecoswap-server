@@ -9,4 +9,5 @@ export const TABLES = {
   CATEGORIES: 'categories',
   MESSAGES: 'messages',
   CHATS: 'chats',
+  FAVORITES: 'favorites',
 };
