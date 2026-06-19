@@ -5,7 +5,6 @@ import { validate } from '../middlewares/validateMiddleware.js';
 import { createMeetingSchema } from '../schemas/meeting.schema.js';
 import { supabase } from '../config/supabaseClient.js';
 import { TABLES } from '../constants/entities.js';
-import messageRoutes from './message.routes.js';
 
 const router = Router();
 
@@ -18,13 +17,11 @@ router.post('/:id/cancel', cancelMeeting);
 router.get('/my-meetings', async (req, res) => {
     const { data, error } = await supabase
         .from(TABLES.MEETINGS)
-        .select('*, products(title), locations(name)')
-        .or(`creator_id.eq.${req.user.id},interested_id.eq.${req.user.id}`);
+        .select('*, locations(name), chats!inner(product_id, buyer_id, seller_id, products:product_id(title))')
+        .or(`buyer_id.eq.${req.user.id},seller_id.eq.${req.user.id}`, { foreignTable: 'chats' });
 
     if (error) return res.status(400).json(error);
     res.json(data);
 });
-
-router.use('/:meetingId/messages', messageRoutes);
 
 export default router;

@@ -9,6 +9,7 @@ import meetingRoutes from './routes/meeting.routes.js';
 import reputationRoutes from './routes/reputation.routes.js';
 import reportRoutes from './routes/report.routes.js';
 import categoryRoutes from './routes/category.routes.js';
+import chatRoutes from './routes/chat.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -32,6 +33,7 @@ app.use('/reputation', reputationRoutes);
 app.use('/reports', reportRoutes);
 app.use('/users', userRoutes);
 app.use('/categories', categoryRoutes);
+app.use('/chats', chatRoutes);
 
 export { app, server };
 

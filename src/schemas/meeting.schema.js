@@ -1,12 +1,9 @@
 import { z } from 'zod';
 
 export const createMeetingSchema = z.object({
-  productId: z.any({
-    required_error: 'El ID del producto es obligatorio.'
-  }),
-  interestedId: z.any({
-    required_error: 'El ID del usuario interesado es obligatorio.'
-  }),
+  chatId: z.string({
+    required_error: 'El ID del chat es obligatorio.'
+  }).uuid('El ID del chat debe ser un UUID válido.'),
   locationId: z.any({
     required_error: 'El ID de la ubicación es obligatorio.'
   }),

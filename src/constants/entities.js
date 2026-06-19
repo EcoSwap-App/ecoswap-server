@@ -8,4 +8,5 @@ export const TABLES = {
   LOCATIONS: 'locations',
   CATEGORIES: 'categories',
   MESSAGES: 'messages',
+  CHATS: 'chats',
 };
