@@ -169,7 +169,25 @@ export const deleteChat = async (req, res) => {
       return res.status(403).json({ error: 'No tienes permiso para eliminar esta conversación.' });
     }
 
-    // 2. Eliminar de la base de datos
+    // 2. Obtener reuniones asociadas para desvincularlas de las calificaciones primero
+    const { data: meetings, error: meetError } = await supabase
+      .from(TABLES.MEETINGS)
+      .select('id')
+      .eq('chat_id', chatId);
+
+    if (meetError) return res.status(400).json({ error: meetError.message });
+
+    if (meetings && meetings.length > 0) {
+      const meetingIds = meetings.map(m => m.id);
+      const { error: repError } = await supabase
+        .from(TABLES.REPUTATIONS)
+        .update({ meeting_id: null })
+        .in('meeting_id', meetingIds);
+
+      if (repError) return res.status(400).json({ error: repError.message });
+    }
+
+    // 3. Eliminar de la base de datos (por cascada eliminará mensajes y reuniones)
     const { error: deleteError } = await supabase
       .from(TABLES.CHATS)
       .delete()
@@ -181,3 +199,47 @@ export const deleteChat = async (req, res) => {
     res.status(500).json({ error: 'Error interno del servidor.' });
   }
 };
+
+/**
+ * Actualiza el contenido de un mensaje.
+ * PATCH /chats/messages/:id
+ */
+export const updateChatMessage = async (req, res) => {
+  const { id } = req.params;
+  const { content } = req.body;
+  const userId = req.user.id;
+
+  try {
+    // 1. Obtener mensaje y participantes del chat para validar permisos
+    const { data: message, error: selectError } = await supabase
+      .from(TABLES.MESSAGES)
+      .select('*, chats:chat_id(buyer_id, seller_id)')
+      .eq('id', id)
+      .single();
+
+    if (selectError) return res.status(400).json({ error: selectError.message });
+    if (!message) return res.status(404).json({ error: 'Mensaje no encontrado.' });
+
+    const chat = message.chats;
+    if (!chat) return res.status(400).json({ error: 'Chat asociado no encontrado.' });
+
+    // 2. Validar que el usuario sea comprador o vendedor
+    if (userId !== chat.buyer_id && userId !== chat.seller_id) {
+      return res.status(403).json({ error: 'No tienes permiso para actualizar este mensaje.' });
+    }
+
+    // 3. Realizar la actualización del contenido
+    const { data, error } = await supabase
+      .from(TABLES.MESSAGES)
+      .update({ content })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) return res.status(400).json({ error: error.message });
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+};
+

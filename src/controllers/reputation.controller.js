@@ -101,3 +101,76 @@ export const rateUser = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const getReviewsByUserId = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const { data, error } = await supabase
+      .from(TABLES.REPUTATIONS)
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) return res.status(400).json({ error: error.message });
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ error: 'Error interno del servidor.' });
+  }
+};
+
+export const deleteReview = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    // 1. Obtener reseña
+    const { data: review, error: selectError } = await supabase
+      .from(TABLES.REPUTATIONS)
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (selectError) return res.status(400).json({ error: selectError.message });
+    if (!review) return res.status(404).json({ error: 'Reseña no encontrada.' });
+
+    // 2. Validar que el usuario sea el autor de la reseña
+    if (userId !== review.reviewer_id) {
+      return res.status(403).json({ error: 'No tienes permiso para eliminar esta reseña.' });
+    }
+
+    // 3. Eliminar la reseña
+    const { error: deleteError } = await supabase
+      .from(TABLES.REPUTATIONS)
+      .delete()
+      .eq('id', id);
+
+    if (deleteError) return res.status(400).json({ error: deleteError.message });
+
+    // 4. Recalcular promedio de reputación
+    const targetUserId = review.user_id;
+    const { data: allRates, error: statsError } = await supabase
+      .from(TABLES.REPUTATIONS)
+      .select('points')
+      .eq('user_id', targetUserId);
+
+    if (statsError) throw statsError;
+
+    let average = 5.0;
+    if (allRates && allRates.length > 0) {
+      average = allRates.reduce((acc, curr) => acc + curr.points, 0) / allRates.length;
+    }
+
+    // 5. Actualizar reputación en perfil de usuario
+    const { error: updateError } = await supabase
+      .from(TABLES.USERS)
+      .update({ reputation: average })
+      .eq('id', targetUserId);
+
+    if (updateError) throw updateError;
+
+    res.status(200).json({ message: 'Reseña eliminada con éxito.', newReputation: average });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
