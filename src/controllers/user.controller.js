@@ -10,9 +10,12 @@ export const syncProfile = async (req, res) => {
   const { name, career, cycle } = req.body;
   const { id, email } = req.user; // Datos extraídos previamente por el authMiddleware
 
-  // Verificación redundante de seguridad para dominio de correo
-  if (!email.endsWith('@upc.edu.pe')) {
-    return res.status(403).json({ error: 'Solo se permiten correos de la UPC' });
+  // Verificación de seguridad para dominio de correo (permite UPC y dominios personales comunes para pruebas/MVP)
+  const isUpcEmail = email.endsWith('@upc.edu.pe');
+  const isTestEmail = email.endsWith('@hotmail.com') || email.endsWith('@outlook.com') || email.endsWith('@gmail.com');
+
+  if (!isUpcEmail && !isTestEmail) {
+    return res.status(403).json({ error: 'Solo se permiten correos de la UPC o cuentas personales autorizadas de Microsoft/Google' });
   }
 
   // Inserta el registro o actualiza los campos si el usuario ya existe (upsert basado en la clave primaria 'id')
