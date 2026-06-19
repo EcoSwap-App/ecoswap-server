@@ -127,12 +127,15 @@ export const sendChatMessage = async (req, res) => {
       return res.status(403).json({ error: 'No tienes permiso para enviar mensajes en esta conversación.' });
     }
 
+    const receiverId = userId === chat.buyer_id ? chat.seller_id : chat.buyer_id;
+
     // Insertar mensaje
     const { data: message, error: insertError } = await supabase
       .from(TABLES.MESSAGES)
       .insert([{
         chat_id: chatId,
         sender_id: userId,
+        receiver_id: receiverId,
         content: content
       }])
       .select()
