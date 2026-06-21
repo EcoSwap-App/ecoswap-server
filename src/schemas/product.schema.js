@@ -11,8 +11,9 @@ export const createProductSchema = z.object({
   category: z.any({
     required_error: 'La categoría del producto es obligatoria.'
   }),
-  description: z.string().optional(),
-  status: z.string().optional(),
-  model3d: z.string().optional(),
-  type: z.enum(['sale', 'wanted']).optional()
+  description: z.string().nullable().optional(),
+  status: z.string().nullable().optional(),
+  model3d: z.string().nullable().optional(),
+  type: z.enum(['sale', 'wanted']).nullable().optional(),
+  subject: z.string().nullable().optional()
 });
